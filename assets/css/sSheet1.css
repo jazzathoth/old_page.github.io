@@ -84,8 +84,7 @@ h2
 	padding-bottom: 15px;
 	padding-left: 15px;
 	padding-right: 15px;
-	background-color: rgba(220, 220, 250, 0.9);
-	opacity: 0.5;
+	background-color: rgba(220, 220, 250, 0.8);
 	z-index: inherit;
 }
 
@@ -104,6 +103,41 @@ h2
 .mainSection h2
 {
 	text-align: center;
+	padding-bottom: 30px;
+	text-decoration: underline;
+}
+
+.mainSection h3
+{
+	padding-top: 30px;
+	padding-left: 15px;
+	text-align: left;
+	font-size: 22pt;
+}
+
+.mainSection img
+{
+	display: block;
+    margin-left: auto;
+    margin-right: auto;
+}
+
+.imgBoxMulti img
+{
+	display: inline-block;
+	max-width: 45%;
+	padding: 10px;
+}
+
+.mainSection p
+{
+	padding: 10px;
+}
+
+.mainSection ul
+{
+	list-style-type: disc;
+	padding-left: 30px;
 }
 
 .msBox
@@ -124,11 +158,10 @@ h2
 	filter: progid:DXImageTransform.Microsoft.gradient( startColorstr='#637097', endColorstr='#919dba', GradientType=0 );
 }
 
-.msBox img
+
+.introClass
 {
-	display: block;
-    margin-left: auto;
-    margin-right: auto;
+	
 }
 
 .mainText
@@ -144,16 +177,14 @@ h2
 
 .pfLink a
 {
+	display: block;
 	border: 3px solid #000000;
 	border-radius: 15px;
-	display: block;
-	max-width: 200px;
-	color: #000000;
-	opacity: 1;
+	text-align: center;
+	color: rgba(0, 0, 0, 1);
 	margin: 10px;
 	padding: 15px;
 	background-color: rgba(220, 220, 250, 0.9);
-	opacity: 0.5;
 	z-index: inherit;
 }
 

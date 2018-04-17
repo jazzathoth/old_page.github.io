@@ -23,23 +23,97 @@
 		<a href="#contact">Contact</a>
 		<a href="#about">About</a>
 		<div class="pMenu">
-				<button class="dropMenu" onclick="dropMenuFunc()">Portfolio<i class="fa fa-caret-down"></i></button>
-				<div class="dropMenuLst" id="dropMenuId">
-					<a href="./portfolio1.html">name</a>
-					<a href="./###.html">name2</a>
-					<a href="./###.html">name3</a>
+			<button class="dropMenu" onclick="dropMenuFunc()">Portfolio<i class="fa fa-caret-down"></i></button>
+			<div class="dropMenuLst" id="dropMenuId">
+				<a href="./portfolio1.html">ARM Projects</a>
+				<a href="./avrPage.html">AVR</a>
+				<a href="./motorcycles.html">Motorcycles</a>
+				<a href="#" style="font-weight: bold; text-decoration: none;">ARM Projects</a>
+				<div class="subDropMenuLst">
+				<a href="./armDevSw.html">Dev Tools</a>
+				<a href="./aboutSTM32.html">Hardware Debuggers</a>
+				<a href="./###.html">Internal Peripherals</a>
+				<a href="./###.html">16 x 2 Character LCD Driver</a>
+				<a href="./###.html">Basic Stepper Motor Driver</a>
+				<a href="./###.html">SIM800L Single Chip </br> GSM Development Board</a>
+				<a href="./###.html">Camera Platform Project</a>
 				</div>
+			</div>
 		</div>
 	</div>
 </header>
+
+<!-- Structural -->
 <section id="top"><div class="holder"></div></section>
+
+<!-- Main Content Box -->
+<div class="pageM">
+
+<!-- Introduction -->
 <section class="mainSection">
-	<div class="msBox" style="height: 1000px">
-	<p>
-	Under Construction
-	</p>
+	<div class="msBox introClass">
+		<h2>ARM Projects</h2>
+		<h3>Intro</h3>
+		<p>
+			Learning ARM baremetal development has been both a fun and a frustrating experience. I began seriously
+			trying to develop for Cortex microcontrollers when I decided to start on a project to control a small
+			camera platform over a cellular network with a full featured "SIM800L" GSM board. After a frustrating 
+			experience with my Oscilloscope project with the AVR328P, I realized that a more powerful versatile 
+			processor with more IO pins would probably be necessary here. 
+		</p>	
+		<p>
+			I began the following series of projects around the end of February 2018 to acclimate myself to the new
+			chips.
+		</p>
+		<div>
+			<h3>
+				&#9642 Hardware
+			</h3>
+			<p>
+				The processor used in these projects is the ST Microelectronics STM32f103. I have 2 development 
+				boards that are referred to as "Minimum System Development Boards." </br>
+				
+				This consists of the 48 pin processor soldered to a tiny circuit board featuring:
+			</p>
+			<ul>
+				<li>2 boot jumpers, </li>
+				<li>2 crystal oscillators,</li>
+				<li>40 header pins connecting to their respective pins on the processor (35 are GPIO)</li>
+				<li>A Micro USB connector, </li>
+				<li>2 LED's (1 connected to GPIO, the other a power indicator)</li>
+				<li>Both Serial Wire Debug and regular JTAG for flashing and debugging</li>
+			</ul>
+			
+			<div class="imgBoxMulti">
+				<img alt="'Blue Pill Board Pinout'" src="./assets/images/arm/BPpinout.gif">
+				<img alt="Minimum Sys Dev Board" src="./assets/images/arm/BPsize.jpg">
+			</div>
+		</div>
 	</div>
 </section>
+
+<section class="mainSection">
+	<div class="msBox">
+		<h2>Developer Tools</h2>
+		
+			<div class="imgBoxMulti">
+				<img alt="GNU debugger logo" src="./assets/images/arm/gdb-logo.png">
+				<img alt="STM32 logo" src="./assets/images/arm/stm32logo.png">
+			</div>
+			<div class="imgBoxMulti">
+				<img alt="Eclipse" src="./assets/images/arm/eclipseLogo.png">
+				<img alt="Keil" src="./assets/images/arm/keilLogo.jpg">
+			</div>
+		<h3>And Many More!</h3>
+		<div class="pfLink"><a href="./armDevSw.html">All About The Developer Tools</a></div>
+	</div>
+</section>
+
+
+
+
+</div>
+
 </body>
 
 <footer>

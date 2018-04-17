@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html lang="en-us">
+
+<head>
+<meta charset="UTF-8">
+<meta http-equiv="X-UA-Compatible" content="ie-edge">
+<title>Joe Bender Portfolio</title>
+<!-- Reset Stylesheet  -->
+<link rel="stylesheet" type="text/css" href="assets/css/reset.css">
+<!-- Other Stylesheets -->
+<link rel="stylesheet" type="text/css" href="assets/css/sSheet1.css">
+<link rel="stylesheet" type="text/css" href="assets/css/menu.css">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
+
+</head>
+
+<body>
+<header class="navBar">
+	<div class="logo">
+		<a href="home.html" ><img alt="Title Logo" src="./assets/images/icon1j-big.png"></a>
+	</div>
+	<div class="buttons">
+		<a href="#contact">Contact</a>
+		<a href="#about">About</a>
+		<div class="pMenu">
+			<button class="dropMenu" onclick="dropMenuFunc()">Portfolio<i class="fa fa-caret-down"></i></button>
+			<div class="dropMenuLst" id="dropMenuId">
+				<a href="./portfolio1.html">ARM Projects</a>
+				<a href="./avrPage.html">AVR</a>
+				<a href="./motorcycles.html">Motorcycles</a>
+				<a href="#" style="font-weight: bold; text-decoration: none;">ARM Projects</a>
+				<div class="subDropMenuLst">
+				<a href="./armDevSw.html">Dev Tools</a>
+				<a href="./debuggers.html">Hardware Debuggers</a>
+				<a href="./aboutSTM32.html">Internal Peripherals</a>
+				<a href="./lcdDrv.html">16 x 2 Character LCD Driver</a>
+				<a href="./stepDrv.html">Basic Stepper Motor Driver</a>
+				<a href="./sim800.html">SIM800L Single Chip </br> GSM Development Board</a>
+				<a href="./camCtrlPrj.html">Camera Platform Project</a>
+				</div>
+			</div>
+		</div>
+	</div>
+</header>
+
+<!-- Structural -->
+<section id="top"><div class="holder"></div></section>
+
+<!-- Main Content Box -->
+<div class="pageM">
+
+<section class="mainSection">
+	<div class="msBox">
+		<h3>Atmel, AVR, Arduino</h3>
+		<div class="imgBoxMulti">
+		<img alt="328P drives Stepper" src="./assets/images/avrStepper.jpg">
+		</div>
+		<h3>Atmel</h3>
+		<p>
+			Under Construction
+		</p>
+	</div>
+
+</section>
+
+
+</div>
+</body>
+
+<footer></footer>
+
+<script type="text/javascript" src="./assets/js/main.js"></script>
+</html>
