@@ -51,11 +51,24 @@
 
 <section class="mainSection">
 	<div class="msBox">
-		<h3>Developer Tools:</h3>
+		<h3>Camera Platform</h3>
 		<img alt="stMicto" src="./assets/images/arm/stm32logo.png">
-		<h2>Eclipse Integrated Development Environment</h2>
+		<h2>Camera Control Platform Project Outline:</h2>
 		<p>
-			When
+			The plan for this project is to build a solar powered camera platform (or include a huge battery)
+			to support an Arlo cellular internet security camera. This will be controlled by an STM32f1xx chip
+			driving a stepper motor to rotate the camera through a 360deg arc in a single plane. This will 
+			be controlled through a sim800l gsm module. This will either work through occasional checkins 
+			using mosquito protocol, checkins to a completely separate server, or could be told to listen through 
+			an SMS message. In any case, it will retrieve a degree value from a remote server controlled 
+			through a webpage form consisting of two buttons that will increment the number clockwise or
+			counterclockwise. This will be compared to the system's current state and the stepper will move in
+			the appropriate direction until the numbers match. The platform will determine it's position from an
+			arbitrary zero value on power on. The system will actively check in for a few minutes and will power
+			down after a certain duration of inactivity from the server.
+			This system is meant to be controlled from a smartphone operating in split screen mode with a
+			browser in one half and the Arlo app in the other half of the screen. Its purpose is to position the
+			camera to watch irrigation systems from a remote location to ensure everything is operating correctly.
 		</p>
 	</div>
 

@@ -14,6 +14,7 @@
 
 </head>
 
+<!-- --------Navigation and header, logo, top of page-------- -->
 <body>
 <header class="navBar">
 	<div class="logo">
@@ -43,23 +44,205 @@
 	</div>
 </header>
 
-<!-- Structural -->
+<!-- --------Structural-------- -->
 <section id="top"><div class="holder"></div></section>
 
 <!-- Main Content Box -->
 <div class="pageM">
 
+<!-- -------Main Content Sub-Sections-------- -->
 <section class="mainSection">
 	<div class="msBox">
-		<h3>Developer Tools:</h3>
-		<img alt="stMicto" src="./assets/images/arm/stm32logo.png">
-		<h2>Eclipse Integrated Development Environment</h2>
+		<h3>Debuging and Flashing Hardware</h3>
 		<p>
-			When
+			I have so far used four different methods of flashing and debugging my Cortex M microcontrollers.
+			STMicro's Cortex M3 chips all use Serial Wire Debug (a single wire JTAG interface) as the primary 
+			method to debug and upload software into the chip's main memory. The STM32F1xx chips also have at 
+			least two other ways of writing to the flash memory from a computer: Serial and USB.
 		</p>
+		<p>
+			As I said in the developer tools section, I am running Ubuntu Linux on my primary development machine,
+			which had some effect on the tools I could use here as well. Initially, the STlink-V2 worked fine
+			with Eclipse and OpenOCD, but after a few days and a few hundred flashes, it began to throw errors
+			when I tried connecting. Initially I thought the knockoff STlink-V2 hardware had failed, but after
+			the same thing happened to a second one, I began to suspect something else was wrong. That was when I
+			began exploring other options. I was able to upload via Serial using the FTDI USB to UART. Flashing
+			a Maple bootloader enabled flashing over USB with the "dfu-util" software. And eventually I got 
+			Black Magic Probe firmware on one of my STlink-V2's.
+		</p>
+	</div>
+</section>
+
+
+<section class="mainSection">
+	<div class="msBox">
+		<h3>STlink-V2</h3>
+		<div class="imgBoxMulti">
+			<img alt="stMicto" src="./assets/images/arm/debug/stlinkv2_1.jpg">
+			<div><p style="padding-top: 0px; padding-left: 20px; padding-bottom:20px;">STlink-V2 Serial Wire Debugger</p></div>
+		</div>
+		<p>
+			There are a number of ways of getting your binary on to the chip. For the STM32f103 devices, and pretty
+			much all Cortex M chips from STMicro, the manufacturer sells a proprietary debugger called the STlink.
+			It comes in several versions, the most common and well supported being the STlink-V2. There are 
+			off-shore clones of this available on Amazon and AliExpress for a few dollars each. These use the 
+			Serial Wire Debug JTAG interface to both flash and debug the microcontrollers. 
+		</p>
+		<p>
+			The main advantage of the STlink-V2 is that most of the IDE's directly support flashing and debugging
+			over this interface.  "Keil MDK", which is a Windows only development environment produced by ARM, and
+			"System Workbench for STM32", an open-source Eclipse IDE plugin for STMicro chips, and 
+			"GNU MCU Eclipse," another less specialized Eclipse plugin for embedded software development, all 
+			all support STlink. Another similar proprietary JTAG debugger called J-Link is also widely 
+			supported. All Linux based implementations of these devices use the program OpenOCD (OCD = 
+			On Chip Debugger).
+		</p>
+		<p>
+			I was initially running System Workbench and a few days after receiving my first STlink-V2 from
+			Amazon, OpenOCD began throwing an error claiming it was seeing the wrong device. For some reason
+			the USB device numbers didn't match. OpenOCD appeared to be using the config file for a newer version
+			of the STlink (STlinkV2-1 instead of STlinkV2; V2-1 supported full JTAG, V2 just supported SWD). 
+			Changing the config file, however, only threw a new error. I assumed it was a hardware issue and 
+			ordered a new one. The new STlink worked for 3 days before it began to throw the same error. After
+			digging through lots of config files and online forums, I am suspicious it is related to Ubuntu's 
+			udev configuration, but so far I haven't been able to make it work again. 
+		</p>
+		<p>
+			The thing I like most about these little programmers is that each one contains a whole STM32F1xx 
+			processor, making them very versatile and hackable. When the metal cover is removed, there are four
+			little contacts on the side left over from programming at the factory which connect directly to the
+			SWD and power pins on the chip. I took advantage of this by turning one in to a Black Magic Probe,
+			but there are so many more things that could be done with one of these. Unfortunately only a few pins
+			are actually connected, but it is still a fairly powerful processor in a conveniently tiny package.
+			This warrants a future project.
+		</p>
+	</div>
+</section>
+
+
+<section class="mainSection">
+	<div class="msBox">
+		
+		<h3>Serial Flashing</h3>
+		<div class="imgBoxMulti">
+			<img alt="ftdi ft232r" src="./assets/images/arm/debug/ftdi232_1.jpg">
+			<div><p style="padding-top: 0px; padding-left: 20px; padding-bottom:20px;">FTDI USB UART</p></div>
+		</div>
+		<p>
+			Another option is to use a serial interface. Most of STMicro's Cortex M3's ship with a bootloader in
+			read-only memory that, when activated via pulling up a dedicated boot pin, will enable serial access 
+			to the main program memory over the first USART. I was able to use an FTDI FT232R USB to UART to upload
+			binaries. Unfortunately, that is all you can do with this interface, it doesn't appear any on chip 
+			debugging is available without JTAG.
+		</p>
+		<p>
+			This can be a great solution if all you need to do is flash your files, and if you have the right
+			chip, it may be compatible with the Arduino IDE. I was able to upload a "blinkey" program from 
+			Arduino over FTDI. I don't want to use the Arduino IDE to develop for my Cortex M3 projects however,
+			due to it's severe limitations compared to the standard STMicro libraries. There is also no built in
+			support for flashing this way in any of the other IDEs for Cortex chips. Also, uploading anything 
+			outside the Arduino IDE requires one of several python script uploaders such as
+			<a href="https://github.com/jsnyder/stm32loader">JSnyder's STM32loader.</a> 
+		</p>
+
 	</div>
 
 </section>
+
+
+<section class="mainSection">
+	<div class="msBox">
+		
+		<h3>USB Direct Firmware Uploader</h3>
+		<div class="imgBoxMulti">
+			<img alt="stMicro" src="./assets/images/arm/debug/usbDfu_1.jpg">
+			<div><p style="padding-top: 0px; padding-left: 20px; padding-bottom:20px;">FTDI USB UART</p></div>
+		</div>
+		
+		<p>
+			A third option - once again only for flashing programs - is to directly use the microcontroller's USB
+			interface. This requires a custom bootloader type program to be flashed to the main memory and any 
+			uploaded programs to share the main program memory. It isn't a real time operating system though, 
+			since there is no kernel between your program and the hardware. It is just a simple program that 
+			initializes the USB peripheral and enables access to the flash memory. It also requires a program
+			called "dfu-util" on the computer used to upload the software.
+		</p>
+		<p>
+			This method is also compatible with the Arduino IDE, because Arduino supports the Maple development
+			boards from which the DFU bootloader is derived. Once again, there is no support for this system in
+			any of the other IDEs so all flashing needs to be done through a terminal. The advantage here is that
+			the boot jumper does not need to be reset.
+		</p>
+		<h4>&#9642Note</h4>
+		<p style="padding-left: 25px; font-size: 10pt;">
+			For the blue "Minimum System Development Board" from Amazon or Ali Express like the one I am using
+			here, a 1.5K pullup resistor is required on pin A12 (USB D+). Both boards I have have a 10K resistor
+			instead. A 2.2K in parallel with the 10K seems to work (1/((1/10K)+(1/2.2K)) =~ 1.8K).
+		</p>
+		
+	</div>
+
+</section>
+
+
+<section class="mainSection">
+	<div class="msBox">
+		
+		<h3>Black Magic Probe</h3>
+		<div class="imgBoxMulti">
+			<img alt="black magic probe" src="./assets/images/arm/debug/stlinkv2_4.jpg">
+			<img alt="stlikn swd contacts" src="./assets/images/arm/debug/stlinkv2_2.jpg">
+			<div><p style="padding-top: 0px; padding-left: 20px; padding-bottom:20px;">STlink-V2 dongle BMP hack</p></div>
+		</div>
+		<p>
+			The final option that I used is an open-source utility called "Black Magic Probe." This is a piece of
+			software that uploads a dedicated GNU Debugger host on a Cortex M chip and allows direct debugging
+			including, theoretically, access to all the registers on the target device and running through the
+			code step by step. Unfortunately, this is rather new and doesn't always work perfectly. The Black 
+			Magic Probe software can be downloaded from 
+			<a href="https://github.com/blacksphere/blackmagic">Black Magic Probe Github.</a> run make in the top 
+			level directory and then in ./src run"make clean" and "make PROBE_HOST=stlink".
+		</p>
+		<p>
+			The STlink-V2 is nothing more than a STM32f10x (I have 2, one was a 101 the other a 102) chip
+			on a USB dongle set up like the Atmel AtTiny85. It has it's 4 Serial Wire Debug pins exposed on one
+			side of the PCB. The SWD pins will be Vcc (+3.3V), Vss (Ground/0V), SWDIO (Data), and SWCLK(clock signal).
+			SWDIO goes to pin 34 on the chip and SWCLK to pin 37. These are then connected to the corresponding
+			pins on another SWD capable device.
+		</p>
+		<div class="imgBoxMulti">
+			<img alt="black magic probe" src="./assets/images/arm/debug/stlinkv2_5.jpg">
+			<div><p style="padding-top: 0px; padding-left: 20px; padding-bottom:20px;">STlink-V2 SWD pins</p></div>
+		</div>
+		<p>
+			To flash with OpenOcd, create a text file *name*.cfg containing:</br>
+			set CHIPNAME STM32F103C8T6 </br>
+			source[find interface/stlink-v2.cfg] </br>
+			transport select hla_swd </br>
+			source [find target/stm32f1xx.cfg] </BR>
+			set WORKAREASIZE 0X2000 </br>
+			</br>
+			Then OpenOCD is run in the blackmagic/src with </br>
+			</br>openocd -f *name*.cfg -c'init_reset halt; program blackmagic_dfu.bin 0x800000 verify;reset;exit</br>
+		</p>
+		<p>
+			This installs a DFU bootloader. Now blackmagic.bin can be installed the same way, or over USB with
+			dfu-util. If OpenOCD is used again, remove the 0x800000 memory location so that it won't overwrite
+			the DFU bootloader. This is required to initialize the USB peripheral, and can make updating the
+			firmware easier later.
+		</p>
+		<p>
+			I have had some success getting the Black Magic Probe integrated with the Eclipse IDE. I set up a new
+			debug configuration under GDB Hardware Debugging, disable the remote debugger check box and enter all
+			of the connection commands in the "Setup" tab in the first box. Reset and Halt are both unchecked. 
+			See screenshots below. I have had intermittent success with this method, having the graphical 
+			interface in Eclipse streamlines things a lot, but sometimes it's hard to tell what Eclipse is doing
+			and getting it configured was a mess.
+		</p>
+	</div>
+</section>
+
+
 
 
 </div>

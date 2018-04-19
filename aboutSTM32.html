@@ -51,16 +51,303 @@
 
 <section class="mainSection">
 	<div class="msBox">
-		<h3>Developer Tools:</h3>
-		<img alt="stMicto" src="./assets/images/arm/stm32logo.png">
-		<h2>Eclipse Integrated Development Environment</h2>
+		<h3>The STM32F103</h3>
+		<img alt="stMicro" src="./assets/images/arm/architecture_1.png">
+		<p>-STM32f103 system architecture map </p>
+		<h3>GPIO</h3>
 		<p>
-			When
+			In this example IO port C is enabled in Advanced Peripheral Bus 2 enable register, the high configuration
+			register for GPIO port C (pins 0-7 are low config CRL, 8-15 high config CRH) is set to output mode, 
+			GPIO, push-pull. Then in the while loop the thirteenth bit in the output data register is toggeled
+			via XOR and a simple delay function is called.
 		</p>
+		<p>
+			GPIO is fairly simple to set up and manipulate. There are several registers for setting and resetting
+			the pins and that's pretty much it. The speed can be configured and clock source configured through
+			RCC.
+		</p>
+		<div class="codeBox">
+		<figure>
+			<figcaption>Simple Blinkey Program:</figcaption>
+				<pre>
+					<code>
+#include "stm32f1xx.h"
+			
+void delayAsec(int aSec)                       		 		 	//simple delay function
+{
+	volatile int i;
+	for(i = 1; i < (aSec * 1000); ++i)
+	{
+
+	}
+}
+int main(void)
+{
+
+	RCC ->APB2ENR |= RCC_APB2ENR_IOPCEN;  	//enables GPIO port C
+	GPIOC ->CRH = 0x44244444;             				//Sets pin 13 to output, push-pull
+												//CRH reset state 0x44444444
+
+	while(1)
+	{
+		GPIOC ->ODR ^= 0x2000;            			//Cycles bit 13 in the output data register
+		delayAsec(100);
+	}
+}
+						
+					</code>
+				</pre>
+		</figure>
+		</div>
 	</div>
 
 </section>
 
+<section class="mainSection">
+	<div class="msBox">
+		<h3>Analog Digital Converter</h3>
+		<p>
+			Here I is some sample code for setting up the Analog Digital Converter.  In this case, it might
+			be more efficient to use the TypeDefine structures to group all of the settings in one initialization
+			structure, but I think manipulating the registers directly gives a nice picture of what's actually
+			happening on the processor. This program uses the header file for the 16 x 2 character LCD display I 
+			created to display the value of a potentiometer. I arranged the functions from this program into a 
+			header file to make it easier to utilize the ADC in the future. Will add interrupt handling on a case
+			by case basis until I figure out what configurations will be most useful.
+		</p>
+		<div class="imgBoxMulti">
+		<img alt="adc display" src="./assets/images/arm/adcLCD_1.jpg">
+		</div>
+		<div class="codeBox">
+		<figure>
+		<figcaption>Analog to Digital Converter Demonstration</figcaption>
+			<pre>
+				<code>
+
+#include "stm32f1xx.h"
+#include "LCDdriverF.h"
+
+
+void initializeADC(void)
+{
+	//make sure adc is off
+	ADC1 ->CR2 &= ~ADC_CR2_ADON;
+
+	//calibrate adc, wait for calibration to complete
+	ADC1 ->CR2 |= ADC_CR2_CAL;
+
+	while ((ADC1 ->CR2 & ADC_CR2_CAL) != 0)
+	{}
+
+	//initialize and setup the adc clock
+	RCC ->APB2ENR |= RCC_APB2ENR_ADC1EN;
+	RCC ->CR |= RCC_CR_HSION;
+
+	//wait for the high speed internal clock ready signal
+	while ((RCC ->CR & RCC_CR_HSIRDY) == 0)
+	{}
+
+	//Sets ADC Clock prescaler to 2:1 ((0b00 << 14) on RCC clock config register
+	RCC ->CFGR &= ~RCC_CFGR_ADCPRE;
+	//Sets ADC1 on bit to on. This sets the ADC to ready. Needs to be set again to start conversion
+	ADC1 ->CR2 |= ADC_CR2_ADON;
+
+	//Sets number of clock cycles per sample
+	ADC1 ->SMPR1 |= ADC_SAMPLETIME_239CYCLES5_SMPR1ALLCHANNELS;
+	//Starts conversion
+	ADC1 ->CR2 |= ADC_CR2_ADON;
+}
+
+//select channel 0 - 17 and conversion sequence number. Call only once per channel
+void sequenceChannelSelADC(uint8_t convNum, uint8_t chanNum)
+{
+	if(convNum <= 6)
+	{
+		ADC1 ->SQR3 |= (chanNum << ((convNum - 1) * 5));
+	}
+	if((convNum <= 12) & (convNum >= 7))
+	{
+		ADC1 -> SQR2 |= (chanNum << ((convNum - 7) * 5));
+	}
+	if(convNum >= 13)
+	{
+		ADC1 -> SQR1 |= (chanNum << ((convNum - 13) * 5));
+	}
+}
+
+//select the number of conversions to do. this should be the number of times sequenceChannelSelADC is called
+void numberOfConversionsADC(uint16_t numberOfConversions)
+{
+	ADC1 ->SQR1 |= ((numberOfConversions - 1) << 24);
+}
+
+int main(void)
+{
+initializeADC();
+sequenceChannelSelADC(1, 8);
+numberOfConversionsADC(1);
+
+	while(1)
+	{
+
+		while ((ADC1 ->SR & ADC_SR_EOC) == 0)
+		{}
+		int read = ADC1->DR;
+		sendCmdLCD(LCDsetEntr_L1B1);
+		sendStrLCD("Potentiometer = ");
+		sendCmdLCD(LCDsetEntr_L2B1);
+		sendIntNumberToLCD(read, 8);
+
+	}
+}
+
+
+				</code>
+			</pre>
+		</figure>
+		</div>
+		
+	</div>
+
+</section>
+
+
+<section class="mainSection">
+	<div class="msBox">
+		<h3>Analog Digital Converter</h3>
+		<p>
+			This is a simple setup to transmit a string of characters over a serial port using USART2 in UART 
+			mode. Setting up the USARTS is a little more tedious than setting up the ADC or GPIO so I ended up
+			using initialization structures for this as well as HAL and I also enabled SysTick. SysTick, when 
+			used with high speed internal oscillator, can use the hal delay function to set a delay in 
+			milliseconds without using tying up the processor like a for loop counter from the blinkey example.
+			Also, enabling USART interrupts frees up the processor during sending and receiving events. For
+			instance receiving a byte the USART will send an interrupt when the received data register is full
+			and only then will the core retreive it, instead of being busy from the moment the USART
+			begins receiving the byte.
+		</p>
+		<p>
+			This program simply transmits "hello world" and a null character and a new line character every .5
+			seconds.
+		</p>
+		<div class="codeBox">
+		<figure>
+		<figcaption>Serial Communication with USARTs</figcaption>
+			<pre>
+				<code>
+  * @file    main.c
+
+#include "stm32f1xx.h"
+#include <stm32f1xx_hal.h>
+#include <string.h>
+#include <stdio.h>
+
+void UART_config(void);
+void DMA_config(void);
+void clockConfig(void);
+
+UART_HandleTypeDef uartHandleDef;
+DMA_HandleTypeDef uartDmaHandleDef;
+
+char txData[30] = "hello world \r\n";
+char rxData[30];
+
+int main(void)
+{
+	HAL_Init();
+
+	clockConfig();
+
+	UART_config();
+
+
+
+
+
+
+
+	//HAL_UART_Receive_DMA(&uartHandleDef, (uint8_t *)rxData);
+	while(1)
+	{
+		HAL_UART_Transmit_IT(&uartHandleDef, (uint8_t *)txData, 30);
+		HAL_Delay(500);
+	}
+}
+
+void clockConfig(void)
+{
+	//define Initialization structures
+	RCC_OscInitTypeDef RCC_OscInitStruct;
+	RCC_ClkInitTypeDef RCC_ClkInitStruct;
+
+	//Initializes the CPU, AHB and APB bus clocks, select High Speed Internal
+	 
+	RCC_OscInitStruct.OscillatorType = RCC_OSCILLATORTYPE_HSI;
+	RCC_OscInitStruct.HSIState = RCC_HSI_ON;
+	RCC_OscInitStruct.HSICalibrationValue = 16;
+	RCC_OscInitStruct.PLL.PLLState = RCC_PLL_NONE;
+	HAL_RCC_OscConfig(&RCC_OscInitStruct);
+
+	//Initialize the CPU, AHB and APB bus clocks, set clocks not divided
+	    
+	RCC_ClkInitStruct.ClockType = RCC_CLOCKTYPE_HCLK|RCC_CLOCKTYPE_SYSCLK
+	                            |RCC_CLOCKTYPE_PCLK1|RCC_CLOCKTYPE_PCLK2;
+	RCC_ClkInitStruct.SYSCLKSource = RCC_SYSCLKSOURCE_HSI;
+	RCC_ClkInitStruct.AHBCLKDivider = RCC_SYSCLK_DIV1;
+	RCC_ClkInitStruct.APB1CLKDivider = RCC_HCLK_DIV1;
+	RCC_ClkInitStruct.APB2CLKDivider = RCC_HCLK_DIV1;
+	HAL_RCC_ClockConfig(&RCC_ClkInitStruct, FLASH_LATENCY_0);
+}
+
+void UART_config(void)
+{
+	__HAL_RCC_GPIOA_CLK_ENABLE();
+	__HAL_RCC_USART2_CLK_ENABLE();
+
+	//Set GPIOA to pin 2 to "alternate function out, push-pull" (USART2 Tx)
+	GPIO_InitTypeDef uartGPIOdef;
+	uartGPIOdef.Pin = GPIO_PIN_2;
+	uartGPIOdef.Mode = GPIO_MODE_AF_PP;
+	uartGPIOdef.Pull = GPIO_PULLUP;
+	uartGPIOdef.Speed = GPIO_SPEED_FREQ_HIGH;
+	HAL_GPIO_Init(GPIOA, &uartGPIOdef);
+	
+	//Set GPIOA pin 3 to alternate function input (USART2 Rx)
+	uartGPIOdef.Pin = GPIO_PIN_3;
+	uartGPIOdef.Mode = GPIO_MODE_AF_INPUT;
+	HAL_GPIO_Init(GPIOA, &uartGPIOdef);
+
+	//Setup USART2 115200baud, receive and transmit, 8N1 mode, disable hardware flow ctrl
+	uartHandleDef.Instance = USART2;
+	uartHandleDef.Init.BaudRate = 115200;
+	uartHandleDef.Init.Mode = UART_MODE_TX_RX;
+	uartHandleDef.Init.WordLength = UART_WORDLENGTH_8B;
+	uartHandleDef.Init.StopBits = UART_STOPBITS_1;
+	uartHandleDef.Init.Parity = UART_PARITY_NONE;
+	uartHandleDef.Init.HwFlowCtl = UART_HWCONTROL_NONE;
+	uartHandleDef.Init.OverSampling = UART_OVERSAMPLING_16;
+	HAL_UART_Init(&uartHandleDef);
+
+	//Enable Interrupts
+	HAL_NVIC_SetPriority(USART2_IRQn, 0, 1);
+	HAL_NVIC_EnableIRQ(USART2_IRQn);
+
+
+	//Enable SysTick
+	HAL_SYSTICK_Config(HAL_RCC_GetHCLKFreq()/1000);
+	HAL_SYSTICK_CLKSourceConfig(SYSTICK_CLKSOURCE_HCLK);
+	HAL_NVIC_SetPriority(SysTick_IRQn, 0, 0);
+
+
+}
+				</code>
+			</pre>
+		</figure>
+		</div>
+		
+	</div>
+
+</section>
 
 </div>
 </body>

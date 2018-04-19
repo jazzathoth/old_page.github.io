@@ -53,14 +53,49 @@
 	<div class="msBox">
 		<h2>Developer Tools:</h2>
 		<img alt="Eclipse" src="./assets/images/arm/eclipseLogo.png">
-		<h2>Eclipse Integrated Development Environment</h2>
+		<h3>Eclipse Integrated Development Environment</h3>
 		<p>
-			When
+			I am a fairly dedicated Linux user. I have preferred Ubuntu with the Unity desktop for any serious 
+			work pretty much since it was first released back in 2012. My only functional copy of Windows is 8.1 on
+			a small Atom powered tablet. Unfortunately, the main IDE maintained by ARM, Keil MDK, is only
+			available for Windows. There are two alternatives, both of which are just plugins for the Eclipse IDE:
+			System Workbench for STM32, and GNU MCU Eclipse. Eclipse works great with Ubuntu, and I had used it
+			before for some basic C and C++ development/debugging. I started out with System Workbench since I 
+			found the most documentation on forums and YouTube.
+		</p>
+		<p>
+			Eclipse is a free open source IDE, modules can be downloaded to support almost any programming language.
+			I wrote all the HTML, CSS, and JavaScript for this site using the Web Tools Platform plugin on Eclipse.
+		</p>
+		<h3>System Workbench</h3>
+		<p>
+			The System Workbench plugin is built specifically for STMicro's ARM processors and also has extensive
+			definitions for STMicro based development boards. It utilizes the CMSIS libraries from ARM and the
+			CubeHAL library from STMicro. It exclusively uses the STlinkV2 or V2-1 debugger.
+		</p>
+		<h3>GNU MCU Eclipse</h3>
+		<p>
+			GNU MCU Eclipse plugin supports a much wider range of target processors than System Workbench. This 
+			includes ARM processors from all the manufacturers for which libraries are available, as well as
+			RISC-V, and Freescale. It also supports a wider array of debugging tools, as well as debugging with 
+			the qemu emulator.
 		</p>
 	</div>
 
 </section>
 
+<section class="mainSection">
+	<div class="msBox">
+		<h2>gnu-arm-none-eabi</h2>
+		<h3>The GNU ARM toolchain</h3>
+		<p>
+			The ARM toolchain is part of the GCC (GNU Compiler Collection) project. There are several other more specialized toolchains
+			including Linaro, but pretty much all the functional toolchains for ARM are based on this.
+			Keil MDK uses this toolchain, System Workbench uses this tool chain, GNU MCU Eclipse uses this 
+			toolchain, although it can be swapped out in the latter.
+		</p>
+	</div>
+</section>
 
 </div>
 </body>

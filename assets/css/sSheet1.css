@@ -16,6 +16,12 @@ h2
 	padding: 10px;
 }
 
+.codeBox
+{
+	background-color: rgba(227, 235, 247, 1);
+	border: 2px solid #000000;
+}
+
 .holder
 {
 	position: static;
@@ -115,6 +121,14 @@ h2
 	font-size: 22pt;
 }
 
+.mainSection h4
+{
+	padding-top: 20px;
+	padding-left: 20px;
+	padding-bottom: 0px;
+	font-size: 14pt;
+}
+
 .mainSection img
 {
 	display: block;
@@ -127,6 +141,15 @@ h2
 	display: inline-block;
 	max-width: 45%;
 	padding: 10px;
+	top: 0px;
+}
+
+.imgBox img
+{
+	display: inline-block;
+	max-width: 90%;
+	padding: 10px;
+	top: 0px;
 }
 
 .mainSection p
@@ -159,10 +182,6 @@ h2
 }
 
 
-.introClass
-{
-	
-}
 
 .mainText
 {
@@ -188,7 +207,3 @@ h2
 	z-index: inherit;
 }
 
-.portfolioItem
-{
-	
-}

@@ -51,17 +51,282 @@
 
 <section class="mainSection">
 	<div class="msBox">
-		<h3>Developer Tools:</h3>
-		<img alt="stMicto" src="./assets/images/arm/stm32logo.png">
-		<h2>Eclipse Integrated Development Environment</h2>
+		<h3>16 x 2 LCD driver for the STM32F103</h3>
+		<div class="imgBoxMulti">
+		<img alt="Stepper" src="./assets/images/arm/step/step1.jpg">
+		<img alt="stepper 2" src="./assets/images/arm/step/step3.jpg">
+		</div>
 		<p>
-			When
+			This header file is very similar in structure to the LCD driver, but a bit simpler since the Stepper
+			driver chip only had six inputs. It allows the definition of the hardware setup and makes functions 
+			for all the configuration and control options of the Stepper Driver. The timing and interrupt 
+			control are handled in the main function.
+
 		</p>
+		<p>
+			One interesting thing about this setup is that it requires 3 separate voltages. 3.3V for the 
+			STM32, 5V for the LCD, 24V for the Stepper motor (which was salvaged from an old laser printer).
+			To get these I used a 32V power adapter from a laptop connected to a variable boost/buck converter
+			that brought it down to 24V, and then 2 linear regulators (simple LM317 circuits). I built a box with
+			3 LM317s in it, one set for a constant 5V and the other two variable from 1.25-13V. It was also 
+			essential that all the grounds were tied together. It got a bit messy in prototyping.
+		</p>
+		<div class="codeBox">
+		<figure>
+			<figcaption>StepperDriverA4988_step1.h</figcaption>
+				<pre>
+					<code>
+					
+#ifndef StepperDriverA4988
+
+#include "stm32f1xx.h"
+#include "stdio.h"
+
+#define StepperDriverA4988
+
+#define STEPdir 2
+#define STEPstep 3
+#define STEPms3 4
+#define STEPms2 5
+#define STEPms1 6
+#define STEPena 7
+#define STEPdirPort GPIOA
+#define STEPstepPort GPIOA
+#define STEPms3Port GPIOA
+#define STEPms2Port GPIOA
+#define STEPms1Port GPIOA
+#define STEPenaPort GPIOA
+
+void setPortNPinsToOutSTEP(GPIO_TypeDef *port, int pinNum)
+{
+	if(port == GPIOA)
+	{
+		RCC ->APB2ENR |= RCC_APB2ENR_IOPAEN;
+	}
+	if(port == GPIOB)
+	{
+		RCC ->APB2ENR |= RCC_APB2ENR_IOPBEN;
+	}
+	if(port == GPIOC)
+	{
+		RCC ->APB2ENR |= RCC_APB2ENR_IOPCEN;
+	}
+
+	if(pinNum <= 7)
+	{
+		port ->CRL &= ~(0x3U << ((pinNum * 4)+2));
+		port ->CRL |= (0x3U << (pinNum * 4)); //set mode to output @ 50mhz pb6-7
+	}
+	if(pinNum >= 8)
+	{
+		port ->CRH &= ~(0x3U << (((pinNum - 8) * 4)+2));
+		port ->CRH |= (0x3U << ((pinNum - 8) * 4));//set mode to output @ 50mhz pb8-9, 12-15
+	}
+
+}
+
+void initializeOutputsSTEP(void)
+{
+	setPortNPinsToOutSTEP(STEPdirPort, STEPdir);
+	setPortNPinsToOutSTEP(STEPstepPort, STEPstep);
+	setPortNPinsToOutSTEP(STEPms3Port, STEPms3);
+	setPortNPinsToOutSTEP(STEPms2Port, STEPms2);
+	setPortNPinsToOutSTEP(STEPms1Port, STEPms1);
+	setPortNPinsToOutSTEP(STEPenaPort, STEPena);
+}
+
+//set step mode; 0 = whole step, 4 = 1/16 step
+void setMicroSTEP(int microstep)
+{
+	if(microstep == 0)
+	{
+		STEPms1Port ->BSRR |= (1 << (STEPms1 + 16));
+		STEPms2Port ->BSRR |= (1 << (STEPms2 + 16));
+		STEPms3Port ->BSRR |= (1 << (STEPms3 + 16));
+	}
+	if(microstep == 1)
+	{
+		STEPms1Port ->BSRR |= (1 << STEPms1);
+		STEPms2Port ->BSRR |= (1 << (STEPms2 + 16));
+		STEPms3Port ->BSRR |= (1 << (STEPms3 + 16));
+	}
+	if(microstep == 2)
+	{
+		STEPms1Port ->BSRR |= (1 << (STEPms1 + 16));
+		STEPms2Port ->BSRR |= (1 << STEPms2);
+		STEPms3Port ->BSRR |= (1 << (STEPms3 + 16));
+	}
+	if(microstep == 3)
+	{
+		STEPms1Port ->BSRR |= (1 << STEPms1);
+		STEPms2Port ->BSRR |= (1 << STEPms2);
+		STEPms3Port ->BSRR |= (1 << (STEPms3 + 16));
+	}
+	if(microstep == 4)
+	{
+		STEPms1Port ->BSRR |= (1 << STEPms1);
+		STEPms2Port ->BSRR |= (1 << STEPms2);
+		STEPms3Port ->BSRR |= (1 << STEPms3);
+	}
+}
+
+//send 1 to enable or 0 to disable
+void driverEnableSTEP(uint8_t enableS)
+{
+	if (enableS)
+	{
+		STEPenaPort ->BSRR |= (1 << STEPena);
+	}
+	else
+	{
+		STEPenaPort ->BRR |= (1 << STEPena);
+	}
+}
+
+
+void setDirectionRightSTEP(void)
+{
+	STEPdirPort ->BSRR |= (1 << STEPdir);
+}
+
+void setDirectionLeftSTEP(void)
+{
+	STEPdirPort ->BRR |= (1 << STEPdir);
+}
+
+void moveOneSTEP(void)
+{
+	STEPstepPort ->ODR ^= (1 << STEPstep);
+}
+
+
+
+
+#endif
+					
+
+
+
+					</code>
+				</pre>
+		</figure>
+		</div>
+		
+				<div class="imgBoxMulti">
+		<img alt="Stepper 3" src="./assets/images/arm/step/step2.jpg">
+		<img alt="Stepper 4" src="./assets/images/arm/step/step4.jpg">
+		</div>
+		
+		<h3>Main code</h3>
+		<p>
+			Here I set up the timer TIM2, call the LCD driver, and enable interrupts.
+			The output of the ADC is fed in to the prescaler of TIM2. The prescaler (PSC) defines the number of
+			clock cycles per count. Auto reload (ARR) is how high it counts before it sends and interrupt
+			and starts counting again.
+		</p>
+		<p>
+			The A4988 stepper controller is controlled by a step pin, a direction pin, 3 microstep mode pins
+			and an enable pin. Each time the step pin changes state the motor is moved between a sixteenth of a
+			step and a whole step depending on the state of the three microstep pins. The state of the direction
+			pin determines the direction. The enable pin turns the whole controller on and off. The interrupt 
+			request handler for TIM2 calls the moveOneStep() function which toggles the state of the step pin, 
+			and resets the interrupt flag for TIM2 so it's ready for the next step.
+		</p>
+		<div class="codeBox">
+		<figure>
+			<figcaption>main.c</figcaption>
+				<pre>
+					<code>
+
+
+#include "stm32f1xx.h"
+#include "LCDdriverF_stepS1.h"
+#include "StepperA4988drv_stepS1.h"
+			
+
+int main(void)
+{
+	stdSetupDisplayLCD();
+
+	//enable timer 2 and enable interrupts after each reload
+	RCC ->APB1ENR |= RCC_APB1ENR_TIM2EN;
+	TIM2 ->PSC = 80;
+	TIM2 ->ARR = 100;
+	TIM2 ->CR1 |= TIM_CR1_ARPE;
+	TIM2 ->DIER |= TIM_DIER_UIE;
+	TIM2 ->CR1 |= TIM_CR1_CEN;
+
+	//adc Setup
+	ADC1 ->CR2 &= ~ADC_CR2_ADON;
+
+	send2StringsLCD("Starting ADC    ", "Calibration     ");
+
+	ADC1 ->CR2 |= ADC_CR2_CAL;
+
+	while ((ADC1 ->CR2 & ADC_CR2_CAL) != 0)
+	{}
+
+	send2StringsLCD("Calibration Good", "*               *");
+
+	RCC ->APB2ENR |= RCC_APB2ENR_ADC1EN;
+	RCC ->CR |= RCC_CR_HSION;
+
+	while ((RCC ->CR & RCC_CR_HSIRDY) == 0)
+	{}
+	send2StringsLCD("Clock Started   ", "Starting GetTemp");
+	badTimDelLCD(1000000);
+
+	RCC ->CFGR &= ~RCC_CFGR_ADCPRE;
+	ADC1 ->CR2 |= ADC_CR2_ADON;
+	ADC1 ->SQR3 &= ~ADC_SQR1_L;
+	ADC1 ->SQR3 |= ADC_SQR3_SQ1_3;
+
+	ADC1 ->SMPR1 |= ADC_SAMPLETIME_239CYCLES5_SMPR1ALLCHANNELS;
+
+	ADC1 ->CR2 |= ADC_CR2_ADON;
+
+	sendCmdLCD(LCDclearDsp);
+
+	initializeOutputsSTEP();
+	driverEnableSTEP(0);
+	setMicroSTEP(4);
+	setDirectionLeftSTEP();
+
+	NVIC_EnableIRQ(TIM2_IRQn);
+
+	while(1)
+	{
+		while ((ADC1 ->SR & ADC_SR_EOC) == 0)
+		{}
+		int read = ADC1->DR;
+		sendCmdLCD(LCDsetEntr_L1B1);
+		sendStrLCD("Potentiometer = ");
+		sendCmdLCD(LCDsetEntr_L2B1);
+		sendIntNumberToLCD(read, 8);
+		TIM2 ->PSC = (read / 10);
+	}
+}
+
+void TIM2_IRQHandler(void)
+{
+	if(TIM2 ->SR & TIM_SR_UIF)
+	{
+		TIM2 ->SR &= ~TIM_SR_UIF;
+		moveOneSTEP();
+	}
+}
+	
+
+
+
+					</code>
+				</pre>
+		</figure>
+		</div>
+		
 	</div>
 
 </section>
-
-
 </div>
 </body>
 
